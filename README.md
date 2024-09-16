@@ -1,4 +1,5 @@
 # MOVIE RATING APP 
+
   1. Rendering à list of movies in Vue.js 3 
     - Define the movies as reactive data.
     - Use the Vue.js template syntax to display the movie information.
