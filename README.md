@@ -12,8 +12,12 @@
     - Display the movie rating as stars, with a maximum of 5 stars
 
   ## 2. Event Handling
-    - the difference between inline and method handlers
+    - The difference between inline and method handlers
 
-    - how to access the event object
+    - How to access the event object
     
-    - and how to modify the event with modifiers
+    - And how to modify the event with modifiers
+
+
+## 3. Make Interactive Rating
+    - Disable the button for the currently selected rating to prevent the user from giving the same rating twice.
