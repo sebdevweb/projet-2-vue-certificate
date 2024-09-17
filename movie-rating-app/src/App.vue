@@ -1,41 +1,60 @@
 <script setup>
-  import { ref } from 'vue'
-  import { StarIcon } from '@heroicons/vue/24/solid'
-  import { items } from './movies.json'
+  import { ref } from 'vue' // Importation de 'ref' de Vue pour créer des références réactives.
+  import { StarIcon } from '@heroicons/vue/24/solid' // Importation de l'icône de star depuis Heroicons pour afficher les étoiles.
+  import { items } from './movies.json' // Importation d'un fichier JSON local qui contient une liste de films (données fictives).
   
-  const text = ref('MOVIE RATING APP')
-  const movies = ref(items)
+  const text = ref('MOVIE RATING APP') // Déclare une variable réactive 'text' qui contient le titre de l'application.
+  const movies = ref(items) // Déclare une variable réactive 'movies' qui contient les films importés du fichier JSON.
+
+  // Fonction qui met à jour la note d'un film particulier
+  function updateRating(movieIndex, rating) { // Cette fonction prend deux paramètres : movieIndex (l'index du film dans la liste) et rating (la nouvelle note).
+    movies.value[movieIndex].rating = rating // Accède à la liste des films réactifs, trouve le film correspondant à l'index donné, et met à jour sa note avec la nouvelle valeur.
+  }
 </script>
 
 
 <template>
-  <h1>{{ text }}</h1>
+  <h1>{{ text }}</h1> <!-- Affiche le titre de l'application défini dans la variable 'text'. -->
   
   <div class="movies">
     <!-- Card Movie -->
-    <div class="card" v-for="movie in movies" :key="movie.id">
+     <!-- Boucle pour afficher chaque film sous forme de carte. -->
+    <div class="card" v-for="(movie, movieIndex) in movies" :key="movie.id">
       <div class="card_pic">
-        <img :src="movie.image" :alt="movie.name">
+        <img :src="movie.image" :alt="movie.name">  <!-- Affiche l'image du film, la source de l'image et son alt sont dynamiques. -->
       </div>
       <div class="card_info">
-        <h2 class="card_info--title">{{ movie.name }}</h2>
+        <h2 class="card_info--title">{{ movie.name }}</h2> <!-- Titre du film. -->
+
+        <!-- Liste des genres du film. Chaque genre est affiché dans un paragraphe distinct. -->
         <div class="card_info--captions">
-          <p class="caption" v-for="genre in movie.genres">{{ genre }}</p>
+          <p class="caption" v-for="genre in movie.genres">{{ genre }}</p> 
         </div>
+
+        <!-- Affiche la description du film. -->
         <p class="card_info--description">{{ movie.description }}</p>
+
+        <!-- Liste des acteurs du film. Chaque acteur est affiché dans un paragraphe distinct. -->
         <div class="card_info--actors">
           <p class="actor" v-for="actor in movie.actors">{{ actor }}</p>
         </div>
+
+        <!-- Section pour afficher et mettre à jour la note (rating) du film. -->
         <div class="card_info--rating">
-          <p>Rating [{{ movie.rating }}/5]</p>
+          <p>Rating [{{ movie.rating }}/5]</p> <!-- Affiche la note actuelle du film. -->
+
+          <!-- Section étoiles pour permettre la notation par l'utilisateur. -->
           <div class="stars">
+
+            <!-- Boucle qui affiche 5 étoiles. -->
             <button 
               type="button" 
               v-for="star in 5" 
               :key="star"
               :class="star <= movie.rating ? 'gold' : 'grey'"
+              @click="updateRating(movieIndex, star)" 
               >
-              <StarIcon />
+              <StarIcon /> <!-- Affiche l'icône de l'étoile, depuis le composant importé StarIcon -->
             </button>
           </div>
         </div>
