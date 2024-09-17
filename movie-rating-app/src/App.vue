@@ -47,12 +47,19 @@
           <div class="stars">
 
             <!-- Boucle qui affiche 5 étoiles. -->
+            <!-- type : Définit le type du bouton comme étant un bouton simple. -->
+            <!-- v-for : Crée une boucle qui génère 5 boutons, correspondant aux 5 étoiles. 'star' prend les valeurs de 1 à 5. -->
+            <!-- :key : Assigne une clé unique à chaque bouton en utilisant la valeur de 'star'. Cela permet à Vue d'identifier chaque étoile de manière unique. -->
+            <!-- :class : Applique une classe conditionnelle : 'gold' si 'star' est inférieur ou égal à la note actuelle du film (cela rend l'étoile dorée), sinon 'grey' (étoile grisée). -->
+            <!-- @click : Attache l'événement 'click' qui appelle la fonction 'updateRating'. L'utilisateur clique sur une étoile et envoie l'index du film et la valeur de 'star' (1 à 5), qui met à jour la note du film. -->
+            <!-- :disabled : Désactive le bouton si la valeur de 'star' correspond déjà à la note actuelle du film, empêchant ainsi l'utilisateur de sélectionner la même note deux fois de suite. -->
             <button 
               type="button" 
               v-for="star in 5" 
               :key="star"
               :class="star <= movie.rating ? 'gold' : 'grey'"
-              @click="updateRating(movieIndex, star)" 
+              @click="updateRating(movieIndex, star)"
+              :disabled="star === movie.rating"
               >
               <StarIcon /> <!-- Affiche l'icône de l'étoile, depuis le composant importé StarIcon -->
             </button>
@@ -169,6 +176,9 @@
               }
               svg {
                 width: 20px;
+              }
+              &:disabled {
+                cursor: not-allowed;
               }
             }
           }
