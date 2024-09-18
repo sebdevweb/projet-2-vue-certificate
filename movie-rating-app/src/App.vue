@@ -6,6 +6,9 @@
   const text = ref('MOVIE RATING APP') // Déclare une variable réactive 'text' qui contient le titre de l'application.
   const movies = ref(items) // Déclare une variable réactive 'movies' qui contient les films importés du fichier JSON.
 
+  const starActive = ref({color: 'rgb(213, 180, 16)'}) // Déclare une variable réactive sous forme d'objet qui contient une valeur de style css
+  const starDeactive = ref({color: 'grey'}) // Déclare une variable réactive sous forme d'objet qui contient une valeur de style css
+
   // Fonction qui met à jour la note d'un film particulier
   function updateRating(movieIndex, rating) { // Cette fonction prend deux paramètres : movieIndex (l'index du film dans la liste) et rating (la nouvelle note).
     movies.value[movieIndex].rating = rating // Accède à la liste des films réactifs, trouve le film correspondant à l'index donné, et met à jour sa note avec la nouvelle valeur.
@@ -22,6 +25,11 @@
     <div class="card" v-for="(movie, movieIndex) in movies" :key="movie.id">
       <div class="card_pic">
         <img :src="movie.image" :alt="movie.name">  <!-- Affiche l'image du film, la source de l'image et son alt sont dynamiques. -->
+        <div class="card_bigstar">
+          <StarIcon :style="movie.rating >= 1 ? starActive : starDeactive" /> <!-- Si la note du film est supérieur ou égal à 1 alors affiche le style color starActive sinon affiche starDeactive  -->
+          <span v-if="movie.rating <= 0">-</span> <!-- Si la note du film est inférieur ou égal à 0 : affiche un tiret à la place d'un nombre-->
+          <span v-else>{{ movie.rating }}</span><!-- Sinon affiche la note du film -->
+        </div>
       </div>
       <div class="card_info">
         <h2 class="card_info--title">{{ movie.name }}</h2> <!-- Titre du film. -->
@@ -110,16 +118,35 @@
       box-shadow: 0px 0px 30px rgba(0, 0, 0, 0.3);
       &_pic {
         width: 400px;
-        height: 560px;
+        height: 530px;
         overflow: hidden;
+        position: relative;
         img {
           max-width: 400px;
           height: auto;
         }
       }
+      &_bigstar {
+        position: absolute;
+        top: 10px;
+        right: 0;
+        svg {
+          width: 80px;
+          color: rgb(213, 180, 16);
+        }
+        span {
+          position: absolute;
+          z-index: 4;
+          transform: translate(0%, -50%);
+          right: 44%;
+          top: 50%;
+          font-size: 24px;
+          font-weight: bold;
+        }
+      }
       &_info {
         padding: 20px;
-        height: 330px;
+        height: 280px;
         background-color: #fff;
         position: relative;
         &--title {
@@ -135,11 +162,13 @@
             padding: 4px 8px;
             border-radius: 5px;
             color: #fff;
+            margin-top: 0;
           }
         }
         &--description {
           color: #333;
-          line-height: 1.5;
+          line-height: 1.3;
+          margin-top: 8px;
         }
         &--actors {
           display: flex;
@@ -159,7 +188,7 @@
           justify-content: space-between;
           position: absolute;
           left: 20px;
-          bottom: 20px;
+          bottom: 0;
           .stars {
             margin-left: 10px;
             gap: 5px;
