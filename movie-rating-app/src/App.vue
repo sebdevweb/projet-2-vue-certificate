@@ -17,7 +17,13 @@
 
 
 <template>
-  <h1>{{ text }}</h1> <!-- Affiche le titre de l'application défini dans la variable 'text'. -->
+  <header>
+    <h1>{{ text }}</h1> <!-- Affiche le titre de l'application défini dans la variable 'text'. -->
+  
+    <div class="new_movie">
+      <button class="add" type="button">Add Movie</button>
+    </div>
+  </header>
   
   <div class="movies">
     <!-- Card Movie -->
@@ -87,15 +93,46 @@
     box-sizing: border-box;
     font-family: sans-serif;
   }
-  
-  h1 {
-    text-align: center;
-    color: #5A94E2;
-    border: #5A94E2 3px dashed;
-    max-width: 400px;
-    margin: 24px auto;
-    padding: 12px;
+
+  header {
+    display: flex;
+    height: 150px;
+    position: relative;
+    align-items: center;
+
+    h1 {
+      text-align: center;
+      color: #5A94E2;
+      border: #5A94E2 3px dashed;
+      max-width: 400px;
+      margin: 24px auto;
+      padding: 12px;
+      height: 30px;
+    }
+    .new_movie {
+      position: absolute;
+      right: 20px;
+      top: 50%;
+      transform: translateY(-50%);
+      .add {
+        border: none;
+        padding: 10px 16px;
+        font-size: 18px;
+        border-radius: 10px;
+        background: #5A94E2;
+        color: #fff;
+        font-weight: 400;
+        cursor: pointer;
+        transition: .3s ease-out;
+        &:hover {
+          background: #42b683;
+          transition: .2s ease-in;
+        }
+      }
+    }
   }
+  
+
 
   .movies {
     display: flex;
