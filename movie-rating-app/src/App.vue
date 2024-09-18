@@ -9,6 +9,12 @@
   const starActive = ref({color: 'rgb(213, 180, 16)'}) // Déclare une variable réactive sous forme d'objet qui contient une valeur de style css
   const starDeactive = ref({color: 'grey'}) // Déclare une variable réactive sous forme d'objet qui contient une valeur de style css
 
+  const showFormModal = ref(false)
+
+  function showForm() {
+    showFormModal.value = true
+  }
+
   // Fonction qui met à jour la note d'un film particulier
   function updateRating(movieIndex, rating) { // Cette fonction prend deux paramètres : movieIndex (l'index du film dans la liste) et rating (la nouvelle note).
     movies.value[movieIndex].rating = rating // Accède à la liste des films réactifs, trouve le film correspondant à l'index donné, et met à jour sa note avec la nouvelle valeur.
@@ -17,11 +23,49 @@
 
 
 <template>
+  <!-- MODAL FORM -->
+  <div class="modal" v-if="showFormModal">
+    <div class="modal_content">
+      <h2>Add new movie</h2>
+      <form>
+        <fieldset>
+          <label for="name">Name</label>
+          <input type="text" id="name" placeholder="Add movie name">
+        </fieldset>
+        <fieldset>
+          <label for="description">Description</label>
+          <textarea id="description" placeholder="Add description movie"></textarea>
+        </fieldset>
+        <fieldset>
+          <label for="image">Image</label>
+          <input type="text" id="image" placeholder="Add movie image url">
+        </fieldset>
+        <fieldset>
+          <label for="genre">Genre</label>
+          <select id="genre" multiple>
+            <option value="drama">Drama</option>
+            <option value="crime">Crime</option>
+            <option value="action">Action</option>
+            <option value="comedy">Comedy</option>
+          </select>
+        </fieldset>
+        <fieldset>
+          <label for="theatre">In Theatre</label>
+          <input type="checkbox" id="theatre">
+        </fieldset>
+        <fieldset class="actions">
+          <button type="button" class="cancel" @click="showFormModal = false">Cancel</button>
+          <button type="button" class="create">Create</button>
+        </fieldset>
+      </form>
+    </div>
+  </div>
+
   <header>
     <h1>{{ text }}</h1> <!-- Affiche le titre de l'application défini dans la variable 'text'. -->
   
     <div class="new_movie">
-      <button class="add" type="button">Add Movie</button>
+      <button class="add" type="button" @click="showForm">Add Movie</button>
     </div>
   </header>
   
@@ -94,6 +138,105 @@
     font-family: sans-serif;
   }
 
+  .modal {
+    display: flex;
+    justify-content: center;
+    flex-direction: column;
+    align-items: center;
+    height: 100vh;
+    width: 100vw;
+    position: fixed;
+    top: 0;
+    left: 0;
+    background: rgba(0, 0, 0, .3);
+    z-index: 2;
+    &_content {
+      // filter: blur(4px);
+      background: #fff;
+      padding: 48px;
+      max-width: 800px;
+      width: 100%;
+      border-radius: 20px;
+      box-shadow: 0px 0px 30px rgba(0, 0, 0, 0.5);
+      h2 {
+        text-align: center;
+        color: #5A94E2;
+        font-size: 32px;
+        margin-top: 0;
+      }
+      form {
+        fieldset {
+          border: none;
+          display: flex;
+          flex-direction: column;
+          label {
+            font-size: 16px;
+            color: #333;
+            margin-bottom: 10px;
+          }
+          input, textarea, select {
+            width: 100%;
+            max-width: 800px;
+            border: 1px solid #999;
+            padding: 10px;
+            background: #5a95e21c;
+            font-size: 16px;
+            font-family: sans-serif;
+            overflow-y: auto;
+            color: #333;
+            &::placeholder {
+              font-size: 14px;
+              color: #999;
+              font-style: italic;
+              font-family: sans-serif;
+            }
+            
+          }
+          &:nth-child(5) {
+            align-items: center;
+            flex-direction: row;
+            label {
+              margin-bottom: 0;
+            }
+            input[type="checkbox"] {
+              width: 20px;
+            }
+          }
+          &.actions {
+            display: flex;
+            flex-direction: row;
+            justify-content: space-between;
+            margin-top: 30px;
+            button {
+              border: none;
+              padding: 10px 20px;
+              border-radius: 7px;
+              font-size: 18px;
+              color: #fff;
+              cursor: pointer;
+              transition: .3s ease-out;
+              &.cancel {
+                background: #999;
+                transition: .2s ease-in;
+                &:hover {
+                  background: #666;
+                }
+              }
+              &.create {
+                background: #5A94E2;
+                &:hover {
+                  background: #42b683;
+                  transition: .2s ease-in;
+                }
+              }
+            }
+
+          }
+        }
+      }
+    }
+  }
+
   header {
     display: flex;
     height: 150px;
@@ -132,8 +275,6 @@
     }
   }
   
-
-
   .movies {
     display: flex;
     gap: 16px;
@@ -173,7 +314,7 @@
         }
         span {
           position: absolute;
-          z-index: 4;
+          z-index: 1;
           transform: translate(0%, -50%);
           right: 44%;
           top: 50%;

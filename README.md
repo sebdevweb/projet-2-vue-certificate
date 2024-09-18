@@ -32,3 +32,17 @@
 
 ## 5. Create Movie Form
     - Create an "Add Movie" button
+
+    - Show a form for creating new movies when the button is clicked
+        
+    - Include the following fields on the form:
+
+        - Name: text input & required
+
+        - Description: textarea
+
+        - Image: text input
+
+        - Genre: dropdown & required & user can select multiple
+        
+        - Is in theaters: checkbox
