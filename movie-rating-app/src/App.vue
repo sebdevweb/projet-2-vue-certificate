@@ -1,75 +1,247 @@
 <script setup>
-  import { ref } from 'vue' // Importation de 'ref' de Vue pour créer des références réactives.
-  import { StarIcon } from '@heroicons/vue/24/solid' // Importation de l'icône de star depuis Heroicons pour afficher les étoiles.
+  import { ref, reactive, computed } from 'vue' // Importation de 'ref' de Vue pour créer des références réactives.
+  import { StarIcon, PencilIcon, TrashIcon } from '@heroicons/vue/24/solid' // Importation de l'icône de star depuis Heroicons pour afficher les étoiles.
   import { items } from './movies.json' // Importation d'un fichier JSON local qui contient une liste de films (données fictives).
   
   const text = ref('MOVIE RATING APP') // Déclare une variable réactive 'text' qui contient le titre de l'application.
   const movies = ref(items) // Déclare une variable réactive 'movies' qui contient les films importés du fichier JSON.
-
   const starActive = ref({color: 'rgb(213, 180, 16)'}) // Déclare une variable réactive sous forme d'objet qui contient une valeur de style css
   const starDeactive = ref({color: 'grey'}) // Déclare une variable réactive sous forme d'objet qui contient une valeur de style css
 
-  const showFormModal = ref(false)
-
-  function showForm() {
-    showFormModal.value = true
-  }
+  // Propriété calculé computed pour déterminer le nombre d'items total
+  const totalMovies = computed(() => {
+    return movies.value.length
+  })
 
   // Fonction qui met à jour la note d'un film particulier
   function updateRating(movieIndex, rating) { // Cette fonction prend deux paramètres : movieIndex (l'index du film dans la liste) et rating (la nouvelle note).
     movies.value[movieIndex].rating = rating // Accède à la liste des films réactifs, trouve le film correspondant à l'index donné, et met à jour sa note avec la nouvelle valeur.
   }
+
+  // Supprime un film de la liste en filtrant le tableau movies selon l'indice du film à supprimer.
+  function removeMovie(movieIndex) {
+    movies.value = movies.value.filter((movie, index) => index !== movieIndex);
+  }
+
+  // Pré-remplit un formulaire avec les informations du film sélectionné pour permettre son édition.
+  function editMovie(movieIndex) {
+    const movie = movies.value[movieIndex];
+
+    form.id = movie.id;
+    form.name = movie.name;
+    form.description = movie.description;
+    form.image = movie.image;
+    form.inTheaters = movie.inTheaters;
+    form.genres = movie.genres;
+
+    showForm();
+  }
+
+  // Cet objet suit les erreurs de validation pour chaque champ du formulaire (nom, description, image, etc.).
+  const errors = reactive({
+    name: null,
+    description: null,
+    image: null,
+    inTheaters: null,
+    genres: null,
+  });
+
+  // Contient les données du formulaire utilisé pour ajouter ou éditer un film.
+  const form = reactive({
+    id: null,
+    name: null,
+    description: null,
+    image: null,
+    inTheaters: false,
+    genres: null,
+  });
+
+  // Définit les règles de validation, ici les champs name et genres sont requis.
+  const validations = reactive({
+    name: "required",
+    genres: "required",
+  });
+
+  // Gestion de l'affichage des options dans le select
+  const genres = reactive([
+    { text: "Drama", value: "Drama" },
+    { text: "Crime", value: "Crime" },
+    { text: "Action", value: "Action" },
+    { text: "Comedy", value: "Comedy" },
+  ]);
+
+  // Retourne une expression régulière utilisée pour valider les champs requis.
+  const validationRules = (rule) => {
+    if (rule === "required") return /^ *$/;
+
+    return null;
+  };
+
+  // Vérifie si les champs du formulaire respectent les règles de validation. Si une erreur est détectée, elle est enregistrée dans errors.
+  function validate() {
+    let valid = true;
+    clearErrors();
+    for (const [field, rule] of Object.entries(validations)) {
+      const validation = validationRules(rule);
+      if (validation) {
+        if (validation.test(form[field] || "")) {
+          errors[field] = `${field} is ${rule}`;
+          valid = false;
+        }
+      }
+    }
+
+    return valid;
+  }
+
+  // Sauvegarde un film, soit en le mettant à jour si form.id existe, soit en en ajoutant un nouveau.
+  function saveMovie() {
+    if (form.id) {
+      updateMovie();
+    } else {
+      addMovie();
+    }
+  }
+
+  // Met à jour un film existant en validant le formulaire et en remplaçant le film dans la liste.
+  function updateMovie() {
+    if (validate()) {
+      const movie = {
+        id: form.id,
+        name: form.name,
+        description: form.description,
+        image: form.image,
+        genres: form.genres,
+        inTheaters: form.inTheaters,
+        rating: 0,
+      };
+
+      movies.value = movies.value.map((m) => {
+        if (m.id === movie.id) {
+          movie.rating = m.rating;
+          return movie;
+        }
+        return m;
+      });
+
+      hideForm();
+    }
+  }
+
+  // Ajoute un nouveau film après validation.
+  function addMovie() {
+    if (validate()) {
+      const movie = {
+        id: Number(Date.now()),
+        name: form.name,
+        description: form.description,
+        image: form.image,
+        genres: form.genres,
+        inTheaters: form.inTheaters,
+        rating: 0,
+      };
+      movies.value.push(movie);
+      hideForm();
+    }
+  }
+
+  // Réinitialisent le formulaire et les erreurs après soumission ou annulation.
+  function cleanUpForm() {
+    form.name = null;
+    form.description = null;
+    form.image = null;
+    form.genres = null;
+    form.id = null;
+    form.inTheaters = false;
+    clearErrors();
+  }
+  function clearErrors() {
+    errors.name = null;
+    errors.description = null;
+    errors.image = null;
+    errors.genres = null;
+    errors.inTheaters = null;
+  }
+
+  const showMovieForm = ref(false) // Variable réactive qui détermine si le formulaire est visible ou non
+  function hideForm() {
+    showMovieForm.value = false;
+    cleanUpForm()
+  }
+  function showForm() {
+    showMovieForm.value = true;
+  }
+
+  
 </script>
 
 
 <template>
   <!-- MODAL FORM -->
-  <div class="modal" v-if="showFormModal">
+  <div class="modal" v-if="showMovieForm">
     <div class="modal_content">
       <h2>Add new movie</h2>
-      <form>
+      <form @submit.prevent="saveMovie">
         <fieldset>
           <label for="name">Name</label>
-          <input type="text" id="name" placeholder="Add movie name">
+          <input type="text" id="name" placeholder="Add movie name" v-model="form.name">
+          <span class="error">{{ errors.name }}</span>
         </fieldset>
         <fieldset>
           <label for="description">Description</label>
-          <textarea id="description" placeholder="Add description movie"></textarea>
+          <textarea id="description" placeholder="Add description movie" v-model="form.description"></textarea>
         </fieldset>
         <fieldset>
           <label for="image">Image</label>
-          <input type="text" id="image" placeholder="Add movie image url">
+          <input type="text" id="image" placeholder="Add movie image url only!" v-model="form.image">
         </fieldset>
         <fieldset>
-          <label for="genre">Genre</label>
-          <select id="genre" multiple>
-            <option value="drama">Drama</option>
-            <option value="crime">Crime</option>
-            <option value="action">Action</option>
-            <option value="comedy">Comedy</option>
+          <label for="genre">Genre <span>(you can select further options)</span></label>
+          <select name="genre" v-model="form.genres" multiple>
+            <option v-for="option in genres" :key="option.value" :value="option.value">
+              {{ option.text }}
+            </option>
           </select>
+          <span class="error">{{ errors.genres }}</span>
         </fieldset>
         <fieldset>
           <label for="theatre">In Theatre</label>
-          <input type="checkbox" id="theatre">
+          <input type="checkbox" id="theatre" v-model="form.inTheaters">
+          <span class="error">{{ errors.inTheaters }}</span>
         </fieldset>
         <fieldset class="actions">
-          <button type="button" class="cancel" @click="showFormModal = false">Cancel</button>
-          <button type="button" class="create">Create</button>
+          <button type="button" class="cancel" @click="hideForm">Cancel</button>
+          <button type="submit" class="create">
+            <span v-if="form.id">Update</span>
+            <span v-else>Create</span>
+          </button>
         </fieldset>
       </form>
     </div>
   </div>
 
-  <header>
+  <header :class="showMovieForm == true ? 'blur' : ''">
     <h1>{{ text }}</h1> <!-- Affiche le titre de l'application défini dans la variable 'text'. -->
   
-    <div class="new_movie">
-      <button class="add" type="button" @click="showForm">Add Movie</button>
+    <div class="header_actions">
+      <div class="total">
+        Total Movie{{ totalMovies > 1 ? 's' : '' }}: <span>{{ totalMovies }}</span>
+      </div>
+      <button 
+        class="add" 
+        type="button" 
+        @click="showForm"
+      >
+      Add Movie
+    </button>
     </div>
   </header>
   
-  <div class="movies">
+  <div 
+    class="movies" 
+    :class="showMovieForm == true ? 'blur' : ''"
+    :style="totalMovies < 1 ? 'background-color: unset' : ''"
+    >
     <!-- Card Movie -->
      <!-- Boucle pour afficher chaque film sous forme de carte. -->
     <div class="card" v-for="(movie, movieIndex) in movies" :key="movie.id">
@@ -122,6 +294,22 @@
               <StarIcon /> <!-- Affiche l'icône de l'étoile, depuis le composant importé StarIcon -->
             </button>
           </div>
+
+          <div class="action">
+            <button
+              class="edit"
+              @click="editMovie(movieIndex)"
+            >
+              <PencilIcon />
+            </button>
+            <button
+              class="remove"
+              @click="removeMovie(movieIndex)"
+            >
+              <TrashIcon />
+            </button>
+          </div>
+
         </div>
       </div>
     </div>
@@ -148,10 +336,9 @@
     position: fixed;
     top: 0;
     left: 0;
-    background: rgba(0, 0, 0, .3);
+    background: rgba(0, 0, 0, .7);
     z-index: 2;
     &_content {
-      // filter: blur(4px);
       background: #fff;
       padding: 48px;
       max-width: 800px;
@@ -173,6 +360,9 @@
             font-size: 16px;
             color: #333;
             margin-bottom: 10px;
+            span {
+              font-style: italic;
+            }
           }
           input, textarea, select {
             width: 100%;
@@ -201,6 +391,11 @@
             input[type="checkbox"] {
               width: 20px;
             }
+          }
+          .error {
+            color: crimson;
+            font-style: italic;
+            margin-top: 5px;
           }
           &.actions {
             display: flex;
@@ -242,6 +437,9 @@
     height: 150px;
     position: relative;
     align-items: center;
+    &.blur {
+      filter:blur(4px)
+    }
 
     h1 {
       text-align: center;
@@ -252,11 +450,22 @@
       padding: 12px;
       height: 30px;
     }
-    .new_movie {
+    .header_actions {
       position: absolute;
       right: 20px;
       top: 50%;
       transform: translateY(-50%);
+      display: flex;
+      align-items: center;
+      gap: 24px;
+      .total {
+        color: #666;
+        font-style: italic;
+        span {
+          font-weight: bold;
+          font-style: normal;
+        }
+      }
       .add {
         border: none;
         padding: 10px 16px;
@@ -268,7 +477,7 @@
         cursor: pointer;
         transition: .3s ease-out;
         &:hover {
-          background: #42b683;
+          background: rgb(66, 182, 131);
           transition: .2s ease-in;
         }
       }
@@ -277,7 +486,7 @@
   
   .movies {
     display: flex;
-    gap: 16px;
+    gap: 32px 18px;
     justify-content: space-around;
     background-color: #42b683;
     padding: 48px;
@@ -287,6 +496,9 @@
     margin: 0 auto;
     border-radius: 20px;
     margin-bottom: 48px;
+    &.blur {
+      filter:blur(4px);
+    }
 
     .card {
       max-width: 400px;
@@ -365,7 +577,6 @@
           align-items: center;
           justify-content: space-between;
           position: absolute;
-          left: 20px;
           bottom: 0;
           .stars {
             margin-left: 10px;
@@ -386,6 +597,29 @@
               }
               &:disabled {
                 cursor: not-allowed;
+              }
+            }
+          }
+          .action {
+            display: flex;
+            justify-content: flex-end;
+            button {
+              border: none;
+              background: none;
+              cursor: pointer;
+              color: #999;
+              &.edit {
+                &:hover {
+                  color: #42b683;
+                }
+              }
+              &.remove {
+                &:hover {
+                  color: crimson;
+                }
+              }
+              svg {
+                width: 20px;
               }
             }
           }
