@@ -44,5 +44,11 @@
         - Image: text input
 
         - Genre: dropdown & required & user can select multiple
-        
+
         - Is in theaters: checkbox
+
+    - Validate the form on submit
+
+        - Add the movie to the list
+
+        - clear and hide the form after the movie is added
